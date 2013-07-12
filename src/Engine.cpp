@@ -108,7 +108,7 @@ void Engine::startVoice(VoiceId voice, size_t soundIndex, float amp)
             METHCLA_PLUGINS_DISKSAMPLER_URI,
             // ... and uncomment this one for memory-based playback.
             // METHCLA_PLUGINS_SAMPLER_URI,
-            { 0.5 * amp },
+            { amp },
             { Methcla::Value(sound.path())
             , Methcla::Value(true) }
         );
@@ -116,8 +116,9 @@ void Engine::startVoice(VoiceId voice, size_t soundIndex, float amp)
         engine().mapOutput(synth, 1, Methcla::AudioBusId(2));
         m_voices[voice] = synth;
         std::cout << "Synth " << synth.id()
-                  << " \"" << sound.path() << "\" "
-                  << "(duration=" << sound.duration() << " amp=" << amp << ")"
+                  << sound.path()
+                  << " duration=" << sound.duration()
+                  << " amp=" << amp
                   << std::endl;
     }
 }
@@ -127,6 +128,9 @@ void Engine::updateVoice(VoiceId voice, float amp)
     auto it = m_voices.find(voice);
     assert( it != m_voices.end() );
     m_engine->set(it->second, 0, amp);
+    std::cout << "Synth " << it->second.id()
+              << " amp=" << amp
+              << std::endl;
 }
 
 void Engine::stopVoice(VoiceId voice)

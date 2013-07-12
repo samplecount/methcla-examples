@@ -52,24 +52,24 @@ inline NSString* resourcePath(NSString* component)
     return { .x = pt.x / sz.width, .y = pt.y / sz.height };
 }
 
+static float mapAmp(float amp)
+{
+    return amp * 0.5f;
+}
+
 - (void) touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
 {
-//    NSLog(@"%@ %f", event, self.view.bounds.size.height);
-
     for (UITouch* touch in touches) {
 	    const CGPoint pt = [self relativeLocation:touch inView:self.view];
-	    engine->startVoice(reinterpret_cast<intptr_t>(touch), engine->nextSound(), pt.x);
+	    engine->startVoice(reinterpret_cast<intptr_t>(touch), engine->nextSound(), mapAmp(pt.x));
     }
 }
 
 - (void) touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event
 {
-//    NSLog(@"%@", event);
-
     for (UITouch* touch in touches) {
 	    const CGPoint pt = [self relativeLocation:touch inView:self.view];
-        engine->updateVoice(reinterpret_cast<intptr_t>(touch), pt.x);
-//        std::cout << "Synth " << synth << ": freq=" << ps.freq << " amp=" << ps.amp << std::endl;
+        engine->updateVoice(reinterpret_cast<intptr_t>(touch), mapAmp(pt.x));
     }
 }
 
@@ -77,7 +77,6 @@ inline NSString* resourcePath(NSString* component)
 {
     for (UITouch* touch in touches) {
     	engine->stopVoice(reinterpret_cast<intptr_t>(touch));
-//        std::cout << "Synth " << synth << " stopped" << std::endl;
     }
 }
 
