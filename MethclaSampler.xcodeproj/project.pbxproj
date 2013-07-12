@@ -16,9 +16,14 @@
 		53A834ED178EA856005E8D03 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 53A834EC178EA856005E8D03 /* Default.png */; };
 		53A834EF178EA856005E8D03 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 53A834EE178EA856005E8D03 /* Default@2x.png */; };
 		53A834F1178EA856005E8D03 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 53A834F0178EA856005E8D03 /* Default-568h@2x.png */; };
-		53A834F4178EA856005E8D03 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 53A834F3178EA856005E8D03 /* ViewController.m */; };
+		53A834F4178EA856005E8D03 /* ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 53A834F3178EA856005E8D03 /* ViewController.mm */; };
 		53A834F7178EA856005E8D03 /* ViewController_iPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = 53A834F5178EA856005E8D03 /* ViewController_iPhone.xib */; };
 		53A834FA178EA856005E8D03 /* ViewController_iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 53A834F8178EA856005E8D03 /* ViewController_iPad.xib */; };
+		53A83504178EBA90005E8D03 /* Engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 53A83500178EBA90005E8D03 /* Engine.cpp */; };
+		53A83505178EBA90005E8D03 /* SoundFileAPI_ExtAudioFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 53A83502178EBA90005E8D03 /* SoundFileAPI_ExtAudioFile.cpp */; };
+		53A83507178EBE08005E8D03 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53A83506178EBE08005E8D03 /* AudioToolbox.framework */; };
+		53A83509178EBE58005E8D03 /* libmethcla.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 53A83508178EBE58005E8D03 /* libmethcla.a */; };
+		53A8350E178FF633005E8D03 /* sounds in Resources */ = {isa = PBXBuildFile; fileRef = 53A8350D178FF633005E8D03 /* sounds */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,9 +41,16 @@
 		53A834EE178EA856005E8D03 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
 		53A834F0178EA856005E8D03 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		53A834F2178EA856005E8D03 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		53A834F3178EA856005E8D03 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		53A834F3178EA856005E8D03 /* ViewController.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ViewController.mm; sourceTree = "<group>"; };
 		53A834F6178EA856005E8D03 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ViewController_iPhone.xib; sourceTree = "<group>"; };
 		53A834F9178EA856005E8D03 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ViewController_iPad.xib; sourceTree = "<group>"; };
+		53A83500178EBA90005E8D03 /* Engine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Engine.cpp; path = ../src/Engine.cpp; sourceTree = "<group>"; };
+		53A83501178EBA90005E8D03 /* Engine.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Engine.hpp; path = ../src/Engine.hpp; sourceTree = "<group>"; };
+		53A83502178EBA90005E8D03 /* SoundFileAPI_ExtAudioFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SoundFileAPI_ExtAudioFile.cpp; path = ../src/SoundFileAPI_ExtAudioFile.cpp; sourceTree = "<group>"; };
+		53A83503178EBA90005E8D03 /* SoundFileAPI_ExtAudioFile.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SoundFileAPI_ExtAudioFile.hpp; path = ../src/SoundFileAPI_ExtAudioFile.hpp; sourceTree = "<group>"; };
+		53A83506178EBE08005E8D03 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		53A83508178EBE58005E8D03 /* libmethcla.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libmethcla.a; path = libs/methcla/libmethcla.a; sourceTree = "<group>"; };
+		53A8350D178FF633005E8D03 /* sounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = sounds; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -46,9 +58,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				53A83507178EBE08005E8D03 /* AudioToolbox.framework in Frameworks */,
 				53A834DB178EA856005E8D03 /* UIKit.framework in Frameworks */,
 				53A834DD178EA856005E8D03 /* Foundation.framework in Frameworks */,
 				53A834DF178EA856005E8D03 /* CoreGraphics.framework in Frameworks */,
+				53A83509178EBE58005E8D03 /* libmethcla.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -58,6 +72,9 @@
 		53A834CE178EA856005E8D03 = {
 			isa = PBXGroup;
 			children = (
+				53A8350D178FF633005E8D03 /* sounds */,
+				53A83508178EBE58005E8D03 /* libmethcla.a */,
+				53A83506178EBE08005E8D03 /* AudioToolbox.framework */,
 				53A834E0178EA856005E8D03 /* MethclaSampler */,
 				53A834D9178EA856005E8D03 /* Frameworks */,
 				53A834D8178EA856005E8D03 /* Products */,
@@ -85,10 +102,14 @@
 		53A834E0178EA856005E8D03 /* MethclaSampler */ = {
 			isa = PBXGroup;
 			children = (
+				53A83500178EBA90005E8D03 /* Engine.cpp */,
+				53A83501178EBA90005E8D03 /* Engine.hpp */,
+				53A83502178EBA90005E8D03 /* SoundFileAPI_ExtAudioFile.cpp */,
+				53A83503178EBA90005E8D03 /* SoundFileAPI_ExtAudioFile.hpp */,
 				53A834E9178EA856005E8D03 /* AppDelegate.h */,
 				53A834EA178EA856005E8D03 /* AppDelegate.m */,
 				53A834F2178EA856005E8D03 /* ViewController.h */,
-				53A834F3178EA856005E8D03 /* ViewController.m */,
+				53A834F3178EA856005E8D03 /* ViewController.mm */,
 				53A834F5178EA856005E8D03 /* ViewController_iPhone.xib */,
 				53A834F8178EA856005E8D03 /* ViewController_iPad.xib */,
 				53A834E1178EA856005E8D03 /* Supporting Files */,
@@ -167,6 +188,7 @@
 				53A834F1178EA856005E8D03 /* Default-568h@2x.png in Resources */,
 				53A834F7178EA856005E8D03 /* ViewController_iPhone.xib in Resources */,
 				53A834FA178EA856005E8D03 /* ViewController_iPad.xib in Resources */,
+				53A8350E178FF633005E8D03 /* sounds in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -179,7 +201,9 @@
 			files = (
 				53A834E7178EA856005E8D03 /* main.m in Sources */,
 				53A834EB178EA856005E8D03 /* AppDelegate.m in Sources */,
-				53A834F4178EA856005E8D03 /* ViewController.m in Sources */,
+				53A834F4178EA856005E8D03 /* ViewController.mm in Sources */,
+				53A83504178EBA90005E8D03 /* Engine.cpp in Sources */,
+				53A83505178EBA90005E8D03 /* SoundFileAPI_ExtAudioFile.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -274,10 +298,24 @@
 		53A834FE178EA856005E8D03 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = armv7;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "MethclaSampler/MethclaSampler-Prefix.pch";
+				HEADER_SEARCH_PATHS = (
+					libs/methcla/include,
+					libs/methcla/plugins,
+					libs/oscpp/include,
+					libs/tinydir,
+				);
 				INFOPLIST_FILE = "MethclaSampler/MethclaSampler-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/libs/methcla\"",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				USER_HEADER_SEARCH_PATHS = libs/iPublicUtility;
+				VALID_ARCHS = armv7;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -285,10 +323,24 @@
 		53A834FF178EA856005E8D03 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = armv7;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "MethclaSampler/MethclaSampler-Prefix.pch";
+				HEADER_SEARCH_PATHS = (
+					libs/methcla/include,
+					libs/methcla/plugins,
+					libs/oscpp/include,
+					libs/tinydir,
+				);
 				INFOPLIST_FILE = "MethclaSampler/MethclaSampler-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/libs/methcla\"",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				USER_HEADER_SEARCH_PATHS = libs/iPublicUtility;
+				VALID_ARCHS = armv7;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
