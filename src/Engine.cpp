@@ -17,6 +17,7 @@
 #include <methcla/common.h>
 #include <methc.la/plugins/disksampler/disksampler.h>
 #include <methc.la/plugins/sampler/sampler.h>
+#include <methc.la/plugins/patch-cable/patch-cable.h>
 
 #include <iostream>
 #include <stdexcept>
@@ -72,6 +73,7 @@ Engine::Engine(const Methcla_SoundFileAPI* soundFileAPI,
     m_engine = new Methcla::Engine({
         Methcla::Option::pluginLibrary(methcla_plugins_sampler),
         Methcla::Option::pluginLibrary(methcla_plugins_disksampler),
+        Methcla::Option::pluginLibrary(methcla_plugins_patch_cable)
     });
 
     // Register the soundfile API passed to the constructor.
@@ -79,10 +81,23 @@ Engine::Engine(const Methcla_SoundFileAPI* soundFileAPI,
 
     // Start the engine.
     engine().start();
+
+    m_voiceGroup = engine().group(engine().root());
+
+    for (auto bus : { 0, 1 }) {
+        auto synth = engine().synth(METHCLA_PLUGINS_PATCH_CABLE_URI, engine().root(), {});
+        engine().mapInput(synth, 0, Methcla::AudioBusId(bus));
+        engine().mapOutput(synth, 0, Methcla::AudioBusId(bus), Methcla::kBusMappingExternal);
+        m_patchCables.push_back(synth);
+    }
 }
 
 Engine::~Engine()
 {
+    engine().freeNode(m_voiceGroup);
+    for (auto synth : m_patchCables) {
+        engine().freeNode(synth);
+    }
     delete m_engine;
 }
 
@@ -108,12 +123,14 @@ void Engine::startVoice(VoiceId voice, size_t soundIndex, float amp)
             METHCLA_PLUGINS_DISKSAMPLER_URI,
             // ... and uncomment this one for memory-based playback.
             // METHCLA_PLUGINS_SAMPLER_URI,
+            m_voiceGroup,
             { amp },
             { Methcla::Value(sound.path())
             , Methcla::Value(true) }
         );
-        engine().mapOutput(synth, 0, Methcla::AudioBusId(1));
-        engine().mapOutput(synth, 1, Methcla::AudioBusId(2));
+        // Map to an internal bus for the fun of it
+        engine().mapOutput(synth, 0, Methcla::AudioBusId(0));
+        engine().mapOutput(synth, 1, Methcla::AudioBusId(1));
         m_voices[voice] = synth;
         std::cout << "Synth " << synth.id()
                   << sound.path()
