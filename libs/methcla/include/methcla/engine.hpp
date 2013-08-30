@@ -33,6 +33,11 @@
 #include <oscpp/server.hpp>
 #include <oscpp/print.hpp>
 
+// Uuugh. OSX macro namespace pollution.
+#ifdef check
+# undef check
+#endif
+
 namespace Methcla
 {
     inline static void dumpRequest(std::ostream& out, const OSCPP::Client::Packet& packet)
