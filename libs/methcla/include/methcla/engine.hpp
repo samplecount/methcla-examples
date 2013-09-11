@@ -26,17 +26,13 @@
 #include <stdexcept>
 #include <string>
 #include <thread>
+#include <type_traits>
 #include <unordered_map>
 #include <vector>
 
 #include <oscpp/client.hpp>
 #include <oscpp/server.hpp>
 #include <oscpp/print.hpp>
-
-// Uuugh. OSX macro namespace pollution.
-#ifdef check
-# undef check
-#endif
 
 namespace Methcla
 {
@@ -426,32 +422,60 @@ namespace Methcla
         virtual void put(OSCPP::Client::Packet& packet) const = 0;
 
         inline static std::shared_ptr<Option> pluginLibrary(Methcla_LibraryFunction f);
+        inline static std::shared_ptr<Option> driverBufferSize(int32_t bufferSize);
     };
 
-    class OptionPluginLibrary : public Option
+    class ValueOption : public Option
     {
     public:
-        OptionPluginLibrary(Methcla_LibraryFunction f)
-            : m_function(f)
+        ValueOption(const char* key, Value value)
+            : m_key(key)
+            , m_value(value)
         { }
 
         virtual void put(OSCPP::Client::Packet& packet) const override
         {
-            char buffer[sizeof(Methcla_LibraryFunction)];
-            std::memcpy(buffer, &m_function, sizeof(Methcla_LibraryFunction));
+            packet.openMessage(m_key.c_str(), 1);
+            m_value.put(packet);
+            packet.closeMessage();
+        }
+
+    private:
+        std::string m_key;
+        Value       m_value;
+    };
+
+    template <typename T> class BlobOption : public Option
+    {
+        static_assert(std::is_pod<T>::value, "Value type must be POD");
+
+    public:
+        BlobOption(const char* key, const T& value)
+            : m_key(key)
+            , m_value(value)
+        { }
+
+        virtual void put(OSCPP::Client::Packet& packet) const override
+        {
             packet
-                .openMessage("/engine/option/plugin-library", 1)
-                .blob(OSCPP::Blob(buffer, sizeof(Methcla_LibraryFunction)))
+                .openMessage(m_key.c_str(), 1)
+                .blob(OSCPP::Blob(&m_value, sizeof(m_value)))
                 .closeMessage();
         }
 
     private:
-        Methcla_LibraryFunction m_function;
+        std::string m_key;
+        T m_value;
     };
 
     std::shared_ptr<Option> Option::pluginLibrary(Methcla_LibraryFunction f)
     {
-        return std::make_shared<OptionPluginLibrary>(f);
+        return std::make_shared<BlobOption<Methcla_LibraryFunction>>("/engine/option/plugin-library", f);
+    }
+
+    std::shared_ptr<Option> Option::driverBufferSize(int32_t bufferSize)
+    {
+        return std::make_shared<ValueOption>("/engine/option/driver/buffer-size", Value(bufferSize));
     }
 
     typedef std::vector<std::shared_ptr<Option>> Options;
@@ -471,7 +495,7 @@ namespace Methcla
             }
             bundle.closeBundle();
             const Methcla_OSCPacket packet = { .data = bundle.data(), .size = bundle.size() };
-            check(methcla_engine_new(handlePacket, this, &packet, &m_engine));
+            checkReturnCode(methcla_engine_new(handlePacket, this, &packet, &m_engine));
         }
         ~Engine()
         {
@@ -490,12 +514,12 @@ namespace Methcla
 
         void start()
         {
-            check(methcla_engine_start(m_engine));
+            checkReturnCode(methcla_engine_start(m_engine));
         }
 
         void stop()
         {
-            check(methcla_engine_stop(m_engine));
+            checkReturnCode(methcla_engine_stop(m_engine));
         }
 
         GroupId root() const
@@ -668,7 +692,7 @@ namespace Methcla
         }
 
     private:
-        static void check(Methcla_Error err)
+        static void checkReturnCode(Methcla_Error err)
         {
             if (err != kMethcla_NoError) {
                 const char* msg = methcla_error_message(err);
@@ -714,7 +738,7 @@ namespace Methcla
 
         void send(const void* packet, size_t size)
         {
-            check(methcla_engine_send(m_engine, packet, size));
+            checkReturnCode(methcla_engine_send(m_engine, packet, size));
         }
 
         void send(const OSCPP::Client::Packet& packet)
