@@ -71,6 +71,7 @@ Engine::Engine(const Methcla_SoundFileAPI* soundFileAPI,
 {
     // Create the engine with a set of plugins.
     m_engine = new Methcla::Engine({
+        Methcla::Option::driverBufferSize(256),
         Methcla::Option::pluginLibrary(methcla_plugins_sampler),
         Methcla::Option::pluginLibrary(methcla_plugins_disksampler),
         Methcla::Option::pluginLibrary(methcla_plugins_patch_cable)
