@@ -146,9 +146,9 @@ void Engine::updateVoice(VoiceId voice, float amp)
     auto it = m_voices.find(voice);
     assert( it != m_voices.end() );
     m_engine->set(it->second, 0, amp);
-    std::cout << "Synth " << it->second.id()
-              << " amp=" << amp
-              << std::endl;
+//    std::cout << "Synth " << it->second.id()
+//              << " amp=" << amp
+//              << std::endl;
 }
 
 void Engine::stopVoice(VoiceId voice)
