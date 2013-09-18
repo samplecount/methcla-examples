@@ -112,6 +112,8 @@ size_t Engine::nextSound()
     return result;
 }
 
+static Methcla_Time kLatency = 0.1;
+
 void Engine::startVoice(VoiceId voice, size_t soundIndex, float amp)
 {
     if (m_voices.find(voice) != m_voices.end()) {
@@ -119,7 +121,8 @@ void Engine::startVoice(VoiceId voice, size_t soundIndex, float amp)
     }
     if (soundIndex < m_sounds.size()) {
         const Sound& sound = m_sounds[soundIndex];
-        const Methcla::SynthId synth = engine().synth(
+        Methcla::Engine::Request request(engine(), engine().currentTime() + kLatency);
+        const Methcla::SynthId synth = request.synth(
             // Comment this line ...
             METHCLA_PLUGINS_DISKSAMPLER_URI,
             // ... and uncomment this one for memory-based playback.
@@ -129,6 +132,7 @@ void Engine::startVoice(VoiceId voice, size_t soundIndex, float amp)
             { Methcla::Value(sound.path())
             , Methcla::Value(true) }
         );
+        request.send();
         // Map to an internal bus for the fun of it
         engine().mapOutput(synth, 0, Methcla::AudioBusId(0));
         engine().mapOutput(synth, 1, Methcla::AudioBusId(1));
@@ -155,7 +159,9 @@ void Engine::stopVoice(VoiceId voice)
 {
     auto it = m_voices.find(voice);
     if (it != m_voices.end()) {
-        engine().freeNode(it->second);
+        Methcla::Engine::Request request(engine(), engine().currentTime() + kLatency);
+        request.free(it->second);
+        request.send();
         m_voices.erase(it);
     }
 }
