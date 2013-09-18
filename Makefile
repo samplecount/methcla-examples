@@ -5,8 +5,8 @@ all:
 
 ARCHIVE_NAME = MethclaSampler-$(shell git describe --tags HEAD)
 
-METHCLA_SRC = ../methcla/engine
-METHCLA_BUILD_CONFIG = release
+METHCLA_SRC := ../methcla/engine
+METHCLA_BUILD_CONFIG := release
 NUM_PROCS = $(shell sysctl -n hw.ncpu)
 
 LIBMETHCLA_IPHONE = $(METHCLA_SRC)/build/$(METHCLA_BUILD_CONFIG)/iphone-universal/libmethcla.a
@@ -15,10 +15,10 @@ LIBMETHCLA_MACOSX = $(METHCLA_SRC)/build/$(METHCLA_BUILD_CONFIG)/macosx/x86_64/l
 .PHONY: $(LIBMETHCLA_IPHONE) $(LIBMETHCLA_MACOSX)
 
 $(LIBMETHCLA_IPHONE):
-	cd $(METHCLA_SRC) && ./shake -j$(NUM_PROCS) iphone-universal
+	cd $(METHCLA_SRC) && ./shake -c $(METHCLA_BUILD_CONFIG) -j$(NUM_PROCS) iphone-universal
 
 $(LIBMETHCLA_MACOSX):
-	cd $(METHCLA_SRC) && ./shake -j$(NUM_PROCS) macosx-jack
+	cd $(METHCLA_SRC) && ./shake -c $(METHCLA_BUILD_CONFIG) -j$(NUM_PROCS) macosx-jack
 
 update-methcla: $(LIBMETHCLA_IPHONE) $(LIBMETHCLA_MACOSX)
 	rsync -av "$(METHCLA_SRC)/include/" "libs/methcla/include"
