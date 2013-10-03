@@ -8,7 +8,6 @@
 
 #import "ViewController.h"
 #import "Engine.hpp"
-#import "SoundFileAPI_ExtAudioFile.hpp"
 
 inline NSString* resourcePath(NSString* component)
 {
@@ -33,7 +32,7 @@ inline NSString* resourcePath(NSString* component)
     // Set up the sound engine
     try {
         // Initialize and configure the audio session
-        engine = new Engine(SoundFileAPI_ExtAudioFile(), [resourcePath(@"sounds") UTF8String]);
+        engine = new Engine([resourcePath(@"sounds") UTF8String]);
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
     }

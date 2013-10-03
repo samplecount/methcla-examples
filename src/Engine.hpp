@@ -23,7 +23,7 @@
 class Sound
 {
 public:
-    Sound(const Methcla_SoundFileAPI* api, const std::string& path);
+    Sound(const Methcla::Engine& engine, const std::string& path);
 
     const std::string& path() const
     {
@@ -43,8 +43,7 @@ private:
 class Engine
 {
 public:
-    Engine(const Methcla_SoundFileAPI* soundFileAPI,
-           const std::string& soundDir);
+    Engine(const std::string& soundDir);
     ~Engine();
 
     Engine(const Engine& other) = delete;
