@@ -28,16 +28,38 @@ extern "C" {
 
 typedef enum
 {
-    kMethcla_Read,
-    kMethcla_Write,
-    kMethcla_ReadWrite
+    kMethcla_FileModeRead,
+    kMethcla_FileModeWrite
 } Methcla_FileMode;
+
+typedef enum
+{
+    kMethcla_SoundFileTypeUnknown,
+    kMethcla_SoundFileTypeAIFF,
+    kMethcla_SoundFileTypeWAV,
+    kMethcla_SoundFileTypeFLAC,
+    kMethcla_SoundFileTypeOGG,
+    kMethcla_SoundFileTypeCAF,
+    kMethcla_SoundFileTypeMP3
+} Methcla_SoundFileType;
+
+typedef enum
+{
+    kMethcla_SoundFileFormatUnknown,
+    kMethcla_SoundFileFormatPCM16,
+    kMethcla_SoundFileFormatPCM24,
+    kMethcla_SoundFileFormatPCM32,
+    kMethcla_SoundFileFormatFloat,
+    kMethcla_SoundFileFormatIMA_ADPCM
+} Methcla_SoundFileFormat;
 
 typedef struct
 {
-    int64_t      frames;
-    unsigned int channels;
-    unsigned int samplerate;
+    int64_t                 frames;
+    unsigned int            channels;
+    unsigned int            samplerate;
+    Methcla_SoundFileType   file_type;
+    Methcla_SoundFileFormat file_format;
 } Methcla_SoundFileInfo;
 
 typedef struct Methcla_SoundFile Methcla_SoundFile;
@@ -49,6 +71,7 @@ struct Methcla_SoundFile
     Methcla_Error (*seek)(const Methcla_SoundFile* file, int64_t numFrames);
     Methcla_Error (*tell)(const Methcla_SoundFile* file, int64_t* numFrames);
     Methcla_Error (*read_float)(const Methcla_SoundFile* file, float* buffer, size_t numFrames, size_t* outNumFrames);
+    Methcla_Error (*write_float)(const Methcla_SoundFile* file, const float* buffer, size_t numFrames, size_t* outNumFrames);
 };
 
 typedef struct Methcla_SoundFileAPI Methcla_SoundFileAPI;
@@ -95,6 +118,14 @@ static inline Methcla_Error methcla_soundfile_read_float(Methcla_SoundFile* file
         (buffer == NULL) || (outNumFrames == NULL))
         return kMethcla_ArgumentError;
     return file->read_float(file, buffer, numFrames, outNumFrames);
+}
+
+static inline Methcla_Error methcla_soundfile_write_float(Methcla_SoundFile* file, const float* buffer, size_t numFrames, size_t* outNumFrames)
+{
+    if ((file == NULL) || (file->write_float == NULL) ||
+        (buffer == NULL) || (outNumFrames == NULL))
+        return kMethcla_ArgumentError;
+    return file->write_float(file, buffer, numFrames, outNumFrames);
 }
 
 #if defined(__cplusplus)

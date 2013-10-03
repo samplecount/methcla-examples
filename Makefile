@@ -21,8 +21,11 @@ $(LIBMETHCLA_MACOSX):
 	cd $(METHCLA_SRC) && ./shake -c $(METHCLA_BUILD_CONFIG) -j$(NUM_PROCS) macosx-jack
 
 update-methcla: $(LIBMETHCLA_IPHONE) $(LIBMETHCLA_MACOSX)
+	mkdir -p "libs/methcla"
 	rsync -av "$(METHCLA_SRC)/include/" "libs/methcla/include"
+	mkdir -p "libs/methcla/ios"
 	cp $(LIBMETHCLA_IPHONE) "libs/methcla/ios/libmethcla.a"
+	mkdir -p "libs/methcla/macosx"
 	cp $(LIBMETHCLA_MACOSX) "libs/methcla/macosx/libmethcla-jack.a"
 
 dist:
