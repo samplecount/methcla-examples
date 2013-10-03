@@ -13,9 +13,7 @@
 		533B361B17CCFCDC00E405AA /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 533B361917CCFCDC00E405AA /* Credits.rtf */; };
 		533B361E17CCFCDC00E405AA /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 533B361D17CCFCDC00E405AA /* AppDelegate.mm */; };
 		533B362117CCFCDD00E405AA /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 533B361F17CCFCDD00E405AA /* MainMenu.xib */; };
-		533B362517CD0C5200E405AA /* SoundFileAPI_ExtAudioFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 53A83502178EBA90005E8D03 /* SoundFileAPI_ExtAudioFile.cpp */; };
 		533B362717CD0E3800E405AA /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 533B362617CD0E3800E405AA /* AudioToolbox.framework */; };
-		533B362817CD0E9000E405AA /* sounds in Resources */ = {isa = PBXBuildFile; fileRef = 53A8350D178FF633005E8D03 /* sounds */; };
 		533B362A17CD0F5800E405AA /* Engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 53A83500178EBA90005E8D03 /* Engine.cpp */; };
 		533B362F17CD131000E405AA /* libmethcla-jack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 533B362E17CD131000E405AA /* libmethcla-jack.a */; };
 		533B363317CF9BCE00E405AA /* Jackmp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 533B363217CF9BCE00E405AA /* Jackmp.framework */; };
@@ -32,10 +30,9 @@
 		53A834F7178EA856005E8D03 /* ViewController_iPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = 53A834F5178EA856005E8D03 /* ViewController_iPhone.xib */; };
 		53A834FA178EA856005E8D03 /* ViewController_iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 53A834F8178EA856005E8D03 /* ViewController_iPad.xib */; };
 		53A83504178EBA90005E8D03 /* Engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 53A83500178EBA90005E8D03 /* Engine.cpp */; };
-		53A83505178EBA90005E8D03 /* SoundFileAPI_ExtAudioFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 53A83502178EBA90005E8D03 /* SoundFileAPI_ExtAudioFile.cpp */; };
 		53A83507178EBE08005E8D03 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53A83506178EBE08005E8D03 /* AudioToolbox.framework */; };
 		53A83509178EBE58005E8D03 /* libmethcla.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 53A83508178EBE58005E8D03 /* libmethcla.a */; };
-		53A8350E178FF633005E8D03 /* sounds in Resources */ = {isa = PBXBuildFile; fileRef = 53A8350D178FF633005E8D03 /* sounds */; };
+		A5C3A8A617FDACAC00AFFF45 /* sounds in Resources */ = {isa = PBXBuildFile; fileRef = A5C3A8A517FDACAC00AFFF45 /* sounds */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -74,11 +71,9 @@
 		53A834F9178EA856005E8D03 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ViewController_iPad.xib; sourceTree = "<group>"; };
 		53A83500178EBA90005E8D03 /* Engine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Engine.cpp; path = src/Engine.cpp; sourceTree = "<group>"; };
 		53A83501178EBA90005E8D03 /* Engine.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Engine.hpp; path = src/Engine.hpp; sourceTree = "<group>"; };
-		53A83502178EBA90005E8D03 /* SoundFileAPI_ExtAudioFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SoundFileAPI_ExtAudioFile.cpp; path = src/SoundFileAPI_ExtAudioFile.cpp; sourceTree = "<group>"; };
-		53A83503178EBA90005E8D03 /* SoundFileAPI_ExtAudioFile.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SoundFileAPI_ExtAudioFile.hpp; path = src/SoundFileAPI_ExtAudioFile.hpp; sourceTree = "<group>"; };
 		53A83506178EBE08005E8D03 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		53A83508178EBE58005E8D03 /* libmethcla.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libmethcla.a; path = libs/methcla/ios/libmethcla.a; sourceTree = "<group>"; };
-		53A8350D178FF633005E8D03 /* sounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = sounds; sourceTree = "<group>"; };
+		A5C3A8A517FDACAC00AFFF45 /* sounds */ = {isa = PBXFileReference; lastKnownFileType = folder; name = sounds; path = "sounds/7773__hoobtastic__acoustic-guitar/sounds"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -146,8 +141,6 @@
 			children = (
 				53A83500178EBA90005E8D03 /* Engine.cpp */,
 				53A83501178EBA90005E8D03 /* Engine.hpp */,
-				53A83502178EBA90005E8D03 /* SoundFileAPI_ExtAudioFile.cpp */,
-				53A83503178EBA90005E8D03 /* SoundFileAPI_ExtAudioFile.hpp */,
 			);
 			name = src;
 			sourceTree = "<group>";
@@ -155,7 +148,7 @@
 		53A834CE178EA856005E8D03 = {
 			isa = PBXGroup;
 			children = (
-				53A8350D178FF633005E8D03 /* sounds */,
+				A5C3A8A517FDACAC00AFFF45 /* sounds */,
 				53A834E0178EA856005E8D03 /* MethclaSampler */,
 				533B361017CCFCDC00E405AA /* MethclaSamplerOSX */,
 				533B362917CD0F4500E405AA /* src */,
@@ -290,7 +283,6 @@
 				533B361517CCFCDC00E405AA /* InfoPlist.strings in Resources */,
 				533B361B17CCFCDC00E405AA /* Credits.rtf in Resources */,
 				533B362117CCFCDD00E405AA /* MainMenu.xib in Resources */,
-				533B362817CD0E9000E405AA /* sounds in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -304,7 +296,7 @@
 				53A834F1178EA856005E8D03 /* Default-568h@2x.png in Resources */,
 				53A834F7178EA856005E8D03 /* ViewController_iPhone.xib in Resources */,
 				53A834FA178EA856005E8D03 /* ViewController_iPad.xib in Resources */,
-				53A8350E178FF633005E8D03 /* sounds in Resources */,
+				A5C3A8A617FDACAC00AFFF45 /* sounds in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -317,7 +309,6 @@
 			files = (
 				533B361717CCFCDC00E405AA /* main.m in Sources */,
 				533B361E17CCFCDC00E405AA /* AppDelegate.mm in Sources */,
-				533B362517CD0C5200E405AA /* SoundFileAPI_ExtAudioFile.cpp in Sources */,
 				533B362A17CD0F5800E405AA /* Engine.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -330,7 +321,6 @@
 				53A834EB178EA856005E8D03 /* AppDelegate.m in Sources */,
 				53A834F4178EA856005E8D03 /* ViewController.mm in Sources */,
 				53A83504178EBA90005E8D03 /* Engine.cpp in Sources */,
-				53A83505178EBA90005E8D03 /* SoundFileAPI_ExtAudioFile.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

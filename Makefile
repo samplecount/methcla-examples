@@ -15,13 +15,14 @@ LIBMETHCLA_MACOSX = $(METHCLA_SRC)/build/$(METHCLA_BUILD_CONFIG)/macosx/x86_64/l
 .PHONY: $(LIBMETHCLA_IPHONE) $(LIBMETHCLA_MACOSX)
 
 $(LIBMETHCLA_IPHONE):
-	cd $(METHCLA_SRC) && ./shake -c $(METHCLA_BUILD_CONFIG) -j$(NUM_PROCS) iphone-universal
+	cd $(METHCLA_SRC) && ./stir -c $(METHCLA_BUILD_CONFIG) -j$(NUM_PROCS) iphone-universal
 
 $(LIBMETHCLA_MACOSX):
-	cd $(METHCLA_SRC) && ./shake -c $(METHCLA_BUILD_CONFIG) -j$(NUM_PROCS) macosx-jack
+	cd $(METHCLA_SRC) && ./stir -c $(METHCLA_BUILD_CONFIG) -j$(NUM_PROCS) macosx-jack
 
 update-methcla: $(LIBMETHCLA_IPHONE) $(LIBMETHCLA_MACOSX)
 	mkdir -p "libs/methcla"
+	pandoc --to html --standalone -o "libs/methcla/ChangeLog.html" "$(METHCLA_SRC)/ChangeLog.md"
 	rsync -av "$(METHCLA_SRC)/include/" "libs/methcla/include"
 	mkdir -p "libs/methcla/ios"
 	cp $(LIBMETHCLA_IPHONE) "libs/methcla/ios/libmethcla.a"
