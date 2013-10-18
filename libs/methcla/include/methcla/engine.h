@@ -26,6 +26,9 @@
 extern "C" {
 #endif
 
+//* Return library version string.
+const char* methcla_version();
+
 //* An integral type for uniquely identifying requests sent to the engine.
 typedef int32_t Methcla_RequestId;
 
@@ -44,6 +47,10 @@ typedef void (*Methcla_PacketHandler)(void* handler_data, Methcla_RequestId requ
 typedef struct Methcla_Engine Methcla_Engine;
 
 //* Create a new engine with the given packet handling closure and options.
+// @handler Packet handler (may be NULL).
+// @handler_data Pointer passed to the packet handler callback.
+// @options OSC packet with engine options (may be NULL).
+// @engine Output parameter for the newly created engine.
 METHCLA_EXPORT Methcla_Error methcla_engine_new(
     Methcla_PacketHandler handler,
     void* handler_data,
@@ -64,6 +71,16 @@ METHCLA_EXPORT Methcla_Error methcla_engine_start(Methcla_Engine* engine);
 
 //* Stop the engine.
 METHCLA_EXPORT Methcla_Error methcla_engine_stop(Methcla_Engine* engine);
+
+enum Methcla_EngineLogFlags
+{
+    kMethcla_EngineLogDefault   = 0x00,
+    kMethcla_EngineLogDebug     = 0x01,
+    kMethcla_EngineLogRequests  = 0x02
+};
+
+//* Set flags for debug logging.
+METHCLA_EXPORT void methcla_engine_set_log_flags(Methcla_Engine* engine, Methcla_EngineLogFlags flags);
 
 //* Time in seconds.
 typedef double Methcla_Time;

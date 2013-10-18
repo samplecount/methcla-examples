@@ -86,11 +86,13 @@ Engine::Engine(const std::string& soundDir)
 
     for (auto bus : { 0, 1 })
     {
-        Methcla::Engine::Bundle request(engine());
+        Methcla::Request request(engine());
+        request.openBundle(Methcla::immediately);
         auto synth = request.synth(METHCLA_PLUGINS_PATCH_CABLE_URI, engine().root(), {});
         request.activate(synth);
         request.mapInput(synth, 0, Methcla::AudioBusId(bus));
         request.mapOutput(synth, 0, Methcla::AudioBusId(bus), Methcla::kBusMappingExternal);
+        request.closeBundle();
         request.send();
         m_patchCables.push_back(synth);
     }
@@ -124,23 +126,26 @@ void Engine::startVoice(VoiceId voice, size_t soundIndex, float amp)
     }
     if (soundIndex < m_sounds.size()) {
         const Sound& sound = m_sounds[soundIndex];
-        Methcla::Engine::Bundle request1(engine(), Methcla::immediately);
-        const Methcla::SynthId synth = request1.synth(
-            // Comment this line ...
-            METHCLA_PLUGINS_DISKSAMPLER_URI,
-            // ... and uncomment this one for memory-based playback.
-            // METHCLA_PLUGINS_SAMPLER_URI,
-            m_voiceGroup,
-            { amp },
-            { Methcla::Value(sound.path())
-            , Methcla::Value(true) }
-        );
-        // Map to an internal bus for the fun of it
-        request1.mapOutput(synth, 0, Methcla::AudioBusId(0));
-        request1.mapOutput(synth, 1, Methcla::AudioBusId(1));
-        Methcla::Engine::Bundle request2(request1, engine().currentTime() + kLatency);
-        request2.activate(synth);
-        request1.send();
+        Methcla::Request request(engine());
+        request.openBundle(Methcla::immediately);
+            const Methcla::SynthId synth = request.synth(
+                // Comment this line ...
+                METHCLA_PLUGINS_DISKSAMPLER_URI,
+                // ... and uncomment this one for memory-based playback.
+                // METHCLA_PLUGINS_SAMPLER_URI,
+                m_voiceGroup,
+                { amp },
+                { Methcla::Value(sound.path())
+                , Methcla::Value(true) }
+            );
+            // Map to an internal bus for the fun of it
+            request.mapOutput(synth, 0, Methcla::AudioBusId(0));
+            request.mapOutput(synth, 1, Methcla::AudioBusId(1));
+            request.openBundle(engine().currentTime() + kLatency);
+                request.activate(synth);
+            request.closeBundle();
+        request.closeBundle();
+        request.send();
         m_voices[voice] = synth;
         std::cout << "Synth " << synth.id()
                   << sound.path()
@@ -164,8 +169,10 @@ void Engine::stopVoice(VoiceId voice)
 {
     auto it = m_voices.find(voice);
     if (it != m_voices.end()) {
-        Methcla::Engine::Bundle request(engine(), engine().currentTime() + kLatency);
+        Methcla::Request request(engine());
+        request.openBundle(engine().currentTime() + kLatency);
         request.free(it->second);
+        request.closeBundle();
         request.send();
         m_voices.erase(it);
     }

@@ -36,6 +36,11 @@
 
 namespace Methcla
 {
+    inline static const char* version()
+    {
+        return methcla_version();
+    }
+
     inline static void dumpRequest(std::ostream& out, const OSCPP::Client::Packet& packet)
     {
         out << "Request (send): " << packet << std::endl;
@@ -90,7 +95,23 @@ namespace Methcla
         private:
             T m_id;
         };
-    };
+
+        inline static void checkReturnCode(Methcla_Error err)
+        {
+            if (err != kMethcla_NoError) {
+                const char* msg = methcla_error_message(err);
+                if (err == kMethcla_ArgumentError) {
+                    throw std::invalid_argument(msg);
+                } else if (err == kMethcla_LogicError) {
+                    throw std::logic_error(msg);
+                } else if (err == kMethcla_MemoryError) {
+                    throw std::bad_alloc();
+                } else {
+                    throw std::runtime_error(msg);
+                }
+            }
+        }
+    }
 
     class NodeId : public detail::Id<NodeId,int32_t>
     {
@@ -177,10 +198,12 @@ namespace Methcla
         void free(T id)
         {
             T i = id - m_offset;
-            if ((i >= 0) && (i < (T)m_bits.size())) {
+            if ((i >= 0) && (i < (T)m_bits.size()) && m_bits[i]) {
                 m_bits[i] = false;
+#if 0 // Don't throw exception for now
             } else {
                 throw std::runtime_error("Invalid id");
+#endif
             }
         }
 
@@ -485,11 +508,226 @@ namespace Methcla
 
     static const Methcla_Time immediately = 0.;
 
-    class Engine
+    typedef ResourceIdAllocator<int32_t> NodeIdAllocator;
+
+    class EngineInterface
     {
     public:
-        Engine(const Options& options)
-            : m_nodeIds(1, 1023)
+        virtual ~EngineInterface() { }
+
+        GroupId root() const
+        {
+            return GroupId(0);
+        }
+
+        virtual NodeIdAllocator& nodeIdAllocator() = 0;
+
+        virtual Packet* allocPacket() = 0;
+        virtual void sendPacket(const Packet* packet) = 0;
+    };
+
+    class Request
+    {
+        struct Flags
+        {
+            bool isMessage : 1;
+            bool isBundle : 1;
+        };
+
+        EngineInterface*    m_engine;
+        Packet*             m_packet;
+        size_t              m_bundleCount;
+        Flags               m_flags;
+
+    private:
+        void beginMessage()
+        {
+            if (m_flags.isMessage)
+                throw std::runtime_error("Cannot send more than one message in non-bundle packet");
+            else if (!m_flags.isBundle)
+                m_flags.isMessage = true;
+        }
+
+        OSCPP::Client::Packet& oscPacket()
+        {
+            return m_packet->packet();
+        }
+
+    public:
+        Request(EngineInterface* engine)
+            : m_engine(engine)
+            , m_packet(engine->allocPacket())
+            , m_bundleCount(0)
+        {
+            m_flags.isMessage = false;
+            m_flags.isBundle = false;
+        }
+
+        Request(EngineInterface& engine)
+            : Request(&engine)
+        { }
+
+        ~Request()
+        {
+            delete m_packet;
+        }
+
+        Request(const Request&) = delete;
+        Request& operator=(const Request&) = delete;
+
+        void openBundle(Methcla_Time time=immediately)
+        {
+            if (m_flags.isMessage)
+            {
+                throw std::runtime_error("Cannot open bundle within message packet");
+            }
+            else
+            {
+                m_flags.isBundle = true;
+                m_bundleCount++;
+                oscPacket().openBundle(methcla_time_to_uint64(time));
+            }
+        }
+
+        // Close nested bundle
+        void closeBundle()
+        {
+            if (m_flags.isMessage)
+            {
+                throw std::runtime_error("closeBundle called on a message request");
+            }
+            else if (m_bundleCount == 0)
+            {
+                throw std::runtime_error("closeBundle without matching openBundle");
+            }
+            else
+            {
+                oscPacket().closeBundle();
+                m_bundleCount--;
+            }
+        }
+
+        void bundle(Methcla_Time time, std::function<void(Request&)> func)
+        {
+            openBundle(time);
+            func(*this);
+            closeBundle();
+        }
+
+        //* Finalize request and send to the engine.
+        void send()
+        {
+            if (m_flags.isBundle && m_bundleCount > 0)
+                throw std::runtime_error("openBundle without matching closeBundle");
+            m_engine->sendPacket(m_packet);
+        }
+
+        GroupId group(GroupId parent)
+        {
+            beginMessage();
+
+            const int32_t nodeId = m_engine->nodeIdAllocator().alloc();
+
+            oscPacket()
+                .openMessage("/group/new", 3)
+                    .int32(nodeId)
+                    .int32(parent.id())
+                    .int32(0) // add action
+                .closeMessage();
+
+            return GroupId(nodeId);
+        }
+
+        SynthId synth(const char* synthDef, GroupId parent, const std::vector<float>& controls, const std::list<Value>& options=std::list<Value>())
+        {
+            beginMessage();
+
+            const int32_t nodeId = m_engine->nodeIdAllocator().alloc();
+
+            oscPacket()
+                .openMessage("/synth/new", 4 + OSCPP::Tags::array(controls.size()) + OSCPP::Tags::array(options.size()))
+                    .string(synthDef)
+                    .int32(nodeId)
+                    .int32(parent.id())
+                    .int32(0)
+                    .putArray(controls.begin(), controls.end());
+
+                    oscPacket().openArray();
+                        for (const auto& x : options) {
+                            x.put(oscPacket());
+                        }
+                    oscPacket().closeArray();
+
+                oscPacket().closeMessage();
+
+            return SynthId(nodeId);
+        }
+
+        void activate(SynthId synth)
+        {
+            beginMessage();
+
+            oscPacket()
+                .openMessage("/synth/activate", 1)
+                .int32(synth.id())
+                .closeMessage();
+        }
+
+        void mapInput(SynthId synth, size_t index, AudioBusId bus, BusMappingFlags flags=kBusMappingInternal)
+        {
+            beginMessage();
+
+            oscPacket()
+                .openMessage("/synth/map/input", 4)
+                    .int32(synth.id())
+                    .int32(index)
+                    .int32(bus.id())
+                    .int32(flags)
+                .closeMessage();
+        }
+
+        void mapOutput(SynthId synth, size_t index, AudioBusId bus, BusMappingFlags flags=kBusMappingInternal)
+        {
+            beginMessage();
+
+            oscPacket()
+                .openMessage("/synth/map/output", 4)
+                    .int32(synth.id())
+                    .int32(index)
+                    .int32(bus.id())
+                    .int32(flags)
+                .closeMessage();
+        }
+
+        void set(NodeId node, size_t index, double value)
+        {
+            beginMessage();
+
+            oscPacket()
+                .openMessage("/node/set", 3)
+                    .int32(node.id())
+                    .int32(index)
+                    .float32(value)
+                .closeMessage();
+        }
+
+        void free(NodeId node)
+        {
+            beginMessage();
+
+            oscPacket()
+                .openMessage("/node/free", 1)
+                .int32(node.id())
+                .closeMessage();
+            m_engine->nodeIdAllocator().free(node.id());
+        }
+    };
+
+    class Engine : public EngineInterface
+    {
+    public:
+        Engine(const Options& options={})
+            : m_nodeIds(1, 1023) // FIXME: Get max number of nodes from options
             , m_requestId(kMethcla_Notification+1)
             , m_packets(8192)
         {
@@ -500,7 +738,7 @@ namespace Methcla
             }
             bundle.closeBundle();
             const Methcla_OSCPacket packet = { .data = bundle.data(), .size = bundle.size() };
-            checkReturnCode(methcla_engine_new(handlePacket, this, &packet, &m_engine));
+            detail::checkReturnCode(methcla_engine_new(handlePacket, this, &packet, &m_engine));
         }
         ~Engine()
         {
@@ -519,213 +757,24 @@ namespace Methcla
 
         void start()
         {
-            checkReturnCode(methcla_engine_start(m_engine));
+            detail::checkReturnCode(methcla_engine_start(m_engine));
         }
 
         void stop()
         {
-            checkReturnCode(methcla_engine_stop(m_engine));
+            detail::checkReturnCode(methcla_engine_stop(m_engine));
         }
 
-        Methcla_Time currentTime() const
+        Methcla_Time currentTime()
         {
             return methcla_engine_current_time(m_engine);
         }
 
-        GroupId root() const
+        void bundle(Methcla_Time time, std::function<void(Request&)> func)
         {
-            return GroupId(0);
-        }
-
-        friend class Request;
-
-        class Request
-        {
-            Engine&                 m_engine;
-            std::shared_ptr<Packet> m_request;
-
-        protected:
-            Engine& engine()
-            {
-                return m_engine;
-            }
-
-            std::shared_ptr<Packet> packet()
-            {
-                return m_request;
-            }
-
-            OSCPP::Client::Packet& oscPacket()
-            {
-                return packet()->packet();
-            }
-
-        public:
-            Request(Engine& engine, std::shared_ptr<Packet> request)
-                : m_engine(engine)
-                , m_request(request)
-            { }
-            Request(Engine& engine)
-                : Request(engine, std::make_shared<Packet>(engine.packets()))
-            { }
-            Request(Engine* engine)
-                : Request(*engine)
-            { }
-
-            //* Send request to the engine.
-            virtual void send()
-            {
-                m_engine.send(oscPacket());
-            }
-
-            GroupId group(GroupId parent)
-            {
-                const int32_t nodeId = m_engine.m_nodeIds.alloc();
-
-                oscPacket()
-                    .openMessage("/group/new", 3)
-                        .int32(nodeId)
-                        .int32(parent.id())
-                        .int32(0) // add action
-                    .closeMessage();
-
-                return GroupId(nodeId);
-            }
-
-            SynthId synth(const char* synthDef, GroupId parent, const std::vector<float>& controls, const std::list<Value>& options=std::list<Value>())
-            {
-                const int32_t nodeId = m_engine.m_nodeIds.alloc();
-
-                oscPacket()
-                    .openMessage("/synth/new", 4 + OSCPP::Tags::array(controls.size()) + OSCPP::Tags::array(options.size()))
-                        .string(synthDef)
-                        .int32(nodeId)
-                        .int32(parent.id())
-                        .int32(0)
-                        .putArray(controls.begin(), controls.end());
-
-                        oscPacket().openArray();
-                            for (const auto& x : options) {
-                                x.put(oscPacket());
-                            }
-                        oscPacket().closeArray();
-
-                    oscPacket().closeMessage();
-
-                return SynthId(nodeId);
-            }
-
-            void activate(SynthId synth)
-            {
-                oscPacket()
-                    .openMessage("/synth/activate", 1)
-                    .int32(synth.id())
-                    .closeMessage();
-            }
-
-            void mapInput(SynthId synth, size_t index, AudioBusId bus, BusMappingFlags flags=kBusMappingInternal)
-            {
-                oscPacket()
-                    .openMessage("/synth/map/input", 4)
-                        .int32(synth.id())
-                        .int32(index)
-                        .int32(bus.id())
-                        .int32(flags)
-                    .closeMessage();
-            }
-
-            void mapOutput(SynthId synth, size_t index, AudioBusId bus, BusMappingFlags flags=kBusMappingInternal)
-            {
-                oscPacket()
-                    .openMessage("/synth/map/output", 4)
-                        .int32(synth.id())
-                        .int32(index)
-                        .int32(bus.id())
-                        .int32(flags)
-                    .closeMessage();
-            }
-
-            void set(NodeId node, size_t index, double value)
-            {
-                oscPacket()
-                    .openMessage("/node/set", 3)
-                        .int32(node.id())
-                        .int32(index)
-                        .float32(value)
-                    .closeMessage();
-            }
-
-            void free(NodeId node)
-            {
-                oscPacket()
-                    .openMessage("/node/free", 1)
-                    .int32(node.id())
-                    .closeMessage();
-                m_engine.m_nodeIds.free(node.id());
-            }
-        };
-
-        class Bundle : public Request
-        {
-            struct Flags
-            {
-                bool isFinished : 1;
-                bool isInner  : 1;
-            };
-
-            Flags m_flags;
-
-        public:
-            Bundle(Engine& engine, Methcla_Time time=immediately)
-                : Request(engine)
-            {
-                m_flags.isFinished = false;
-                m_flags.isInner = false;
-                oscPacket().openBundle(methcla_time_to_uint64(time));
-            }
-            Bundle(Engine* engine, Methcla_Time time=immediately)
-                : Bundle(*engine, time)
-            { }
-
-            Bundle(Bundle& other, Methcla_Time time=immediately)
-                : Request(other.engine(), other.packet())
-            {
-                m_flags.isFinished = false;
-                m_flags.isInner = true;
-                oscPacket().openBundle(methcla_time_to_uint64(time));
-            }
-
-            void close()
-            {
-                if (!m_flags.isFinished)
-                {
-                    oscPacket().closeBundle();
-                    m_flags.isFinished = true;
-                }
-            }
-
-            void bundle(Methcla_Time time, std::function<void(Bundle&)> func)
-            {
-                Bundle bundle(*this, time);
-                func(bundle);
-                close();
-            }
-
-            //* Finalize request and send resulting bundle to the engine.
-            void send() override
-            {
-                if (m_flags.isInner)
-                    throw std::runtime_error("Cannot send nested bundle");
-                close();
-                Request::send();
-            }
-        };
-
-        void bundle(Methcla_Time time, std::function<void(Bundle&)> func)
-        {
-            Bundle bundle(*this, time);
-            func(bundle);
-            bundle.send();
+            Request request(this);
+            request.bundle(time, func);
+            request.send();
         }
 
         GroupId group(GroupId parent)
@@ -779,34 +828,30 @@ namespace Methcla
             request.send();
         }
 
-        PacketPool& packets()
+        NodeIdAllocator& nodeIdAllocator() override
         {
-            return m_packets;
+            return m_nodeIds;
+        }
+
+        Packet* allocPacket()
+        {
+            return new Packet(m_packets);
+        }
+
+        void sendPacket(const Packet* packet) override
+        {
+            send(*packet);
         }
 
     private:
-        static void checkReturnCode(Methcla_Error err)
-        {
-            if (err != kMethcla_NoError) {
-                const char* msg = methcla_error_message(err);
-                if (err == kMethcla_ArgumentError) {
-                    throw std::invalid_argument(msg);
-                } else if (err == kMethcla_LogicError) {
-                    throw std::logic_error(msg);
-                } else if (err == kMethcla_MemoryError) {
-                    throw std::bad_alloc();
-                } else {
-                    throw std::runtime_error(msg);
-                }
-            }
-        }
-
         static void handlePacket(void* data, Methcla_RequestId requestId, const void* packet, size_t size)
         {
+#if 0
             if (requestId == kMethcla_Notification)
                 static_cast<Engine*>(data)->handleNotification(packet, size);
             else
                 static_cast<Engine*>(data)->handleReply(requestId, packet, size);
+#endif
         }
 
         void handleNotification(const void* packet, size_t size)
@@ -831,7 +876,7 @@ namespace Methcla
 
         void send(const void* packet, size_t size)
         {
-            checkReturnCode(methcla_engine_send(m_engine, packet, size));
+            detail::checkReturnCode(methcla_engine_send(m_engine, packet, size));
         }
 
         void send(const OSCPP::Client::Packet& packet)

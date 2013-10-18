@@ -20,18 +20,20 @@
 #include <methcla/common.h>
 #include <methcla/file.h>
 
+#include <stdio.h>
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-//* Offline processing
-METHCLA_EXPORT Methcla_Error methcla_engine_process(
-    Methcla_PacketHandler handler,
-    void* handler_data,
+//* Offline processing.
+METHCLA_EXPORT Methcla_Error methcla_engine_render(
     const Methcla_OSCPacket* options,
-    const Methcla_OSCPacket* commands,
-    const Methcla_SoundFile* input,
-    const Methcla_SoundFile* output
+    const char* inputFile,
+    const char* outputFile,
+    Methcla_SoundFileType outputFileType,
+    Methcla_SoundFileFormat outputFileFormat,
+    const char* commandFile
     );
 
 #if defined(__cplusplus)
