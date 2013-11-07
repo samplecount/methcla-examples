@@ -31,9 +31,26 @@
 		53A834FA178EA856005E8D03 /* ViewController_iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 53A834F8178EA856005E8D03 /* ViewController_iPad.xib */; };
 		53A83504178EBA90005E8D03 /* Engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 53A83500178EBA90005E8D03 /* Engine.cpp */; };
 		53A83507178EBE08005E8D03 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53A83506178EBE08005E8D03 /* AudioToolbox.framework */; };
-		53A83509178EBE58005E8D03 /* libmethcla.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 53A83508178EBE58005E8D03 /* libmethcla.a */; };
+		A5B265E81816873B0088BD47 /* libmethcla.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A5B265E5181687130088BD47 /* libmethcla.a */; };
 		A5C3A8A617FDACAC00AFFF45 /* sounds in Resources */ = {isa = PBXBuildFile; fileRef = A5C3A8A517FDACAC00AFFF45 /* sounds */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A5B265E4181687130088BD47 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A5B265DF181687120088BD47 /* Methcla.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = A5C3A8C318081AF200AFFF45;
+			remoteInfo = methcla;
+		};
+		A5B265E61816872F0088BD47 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A5B265DF181687120088BD47 /* Methcla.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = A5C3A8C218081AF200AFFF45;
+			remoteInfo = methcla;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		533B360917CCFCDC00E405AA /* MethclaSamplerOSX.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MethclaSamplerOSX.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -73,6 +90,7 @@
 		53A83501178EBA90005E8D03 /* Engine.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Engine.hpp; path = src/Engine.hpp; sourceTree = "<group>"; };
 		53A83506178EBE08005E8D03 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		53A83508178EBE58005E8D03 /* libmethcla.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libmethcla.a; path = libs/methcla/ios/libmethcla.a; sourceTree = "<group>"; };
+		A5B265DF181687120088BD47 /* Methcla.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Methcla.xcodeproj; path = ../methcla/engine/platform/xcode/Methcla.xcodeproj; sourceTree = "<group>"; };
 		A5C3A8A517FDACAC00AFFF45 /* sounds */ = {isa = PBXFileReference; lastKnownFileType = folder; name = sounds; path = "sounds/7773__hoobtastic__acoustic-guitar/sounds"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -96,7 +114,7 @@
 				53A834DB178EA856005E8D03 /* UIKit.framework in Frameworks */,
 				53A834DD178EA856005E8D03 /* Foundation.framework in Frameworks */,
 				53A834DF178EA856005E8D03 /* CoreGraphics.framework in Frameworks */,
-				53A83509178EBE58005E8D03 /* libmethcla.a in Frameworks */,
+				A5B265E81816873B0088BD47 /* libmethcla.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -148,6 +166,7 @@
 		53A834CE178EA856005E8D03 = {
 			isa = PBXGroup;
 			children = (
+				A5B265DF181687120088BD47 /* Methcla.xcodeproj */,
 				A5C3A8A517FDACAC00AFFF45 /* sounds */,
 				53A834E0178EA856005E8D03 /* MethclaSampler */,
 				533B361017CCFCDC00E405AA /* MethclaSamplerOSX */,
@@ -211,6 +230,14 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		A5B265E0181687120088BD47 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A5B265E5181687130088BD47 /* libmethcla.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -242,6 +269,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				A5B265E71816872F0088BD47 /* PBXTargetDependency */,
 			);
 			name = MethclaSampler;
 			productName = MethclaSampler;
@@ -267,6 +295,12 @@
 			mainGroup = 53A834CE178EA856005E8D03;
 			productRefGroup = 53A834D8178EA856005E8D03 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = A5B265E0181687120088BD47 /* Products */;
+					ProjectRef = A5B265DF181687120088BD47 /* Methcla.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				53A834D6178EA856005E8D03 /* MethclaSampler */,
@@ -274,6 +308,16 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		A5B265E5181687130088BD47 /* libmethcla.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libmethcla.a;
+			remoteRef = A5B265E4181687130088BD47 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		533B360717CCFCDC00E405AA /* Resources */ = {
@@ -325,6 +369,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A5B265E71816872F0088BD47 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = methcla;
+			targetProxy = A5B265E61816872F0088BD47 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		533B361317CCFCDC00E405AA /* InfoPlist.strings */ = {
@@ -511,21 +563,11 @@
 				ARCHS = armv7;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "MethclaSampler/MethclaSampler-Prefix.pch";
-				HEADER_SEARCH_PATHS = (
-					libs/methcla/include,
-					libs/methcla/plugins,
-					libs/oscpp/include,
-					libs/tinydir,
-				);
+				HEADER_SEARCH_PATHS = libs/tinydir;
 				INFOPLIST_FILE = "MethclaSampler/MethclaSampler-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/libs/methcla/ios\"",
-				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				USER_HEADER_SEARCH_PATHS = libs/iPublicUtility;
-				VALID_ARCHS = armv7;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -536,21 +578,11 @@
 				ARCHS = armv7;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "MethclaSampler/MethclaSampler-Prefix.pch";
-				HEADER_SEARCH_PATHS = (
-					libs/methcla/include,
-					libs/methcla/plugins,
-					libs/oscpp/include,
-					libs/tinydir,
-				);
+				HEADER_SEARCH_PATHS = libs/tinydir;
 				INFOPLIST_FILE = "MethclaSampler/MethclaSampler-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/libs/methcla/ios\"",
-				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				USER_HEADER_SEARCH_PATHS = libs/iPublicUtility;
-				VALID_ARCHS = armv7;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
