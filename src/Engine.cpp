@@ -31,7 +31,7 @@ Sound::Sound(const Methcla::Engine& engine, const std::string& path)
     Methcla_SoundFileInfo info;
     Methcla_Error err = methcla_engine_soundfile_open(engine, m_path.c_str(), kMethcla_FileModeRead, &file, &info);
     if (err != kMethcla_NoError) {
-        throw std::runtime_error("Opening sound file " + path + "failed");
+        throw std::runtime_error("Opening sound file " + path + " failed");
     }
     file->close(file);
     m_duration = (double)info.frames / (double)info.samplerate;
