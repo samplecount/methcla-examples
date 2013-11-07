@@ -51,16 +51,11 @@ inline NSString* resourcePath(NSString* component)
     return { .x = pt.x / sz.width, .y = pt.y / sz.height };
 }
 
-static float mapAmp(float amp)
-{
-    return amp * 0.5f;
-}
-
 - (void) touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
 {
     for (UITouch* touch in touches) {
 	    const CGPoint pt = [self relativeLocation:touch inView:self.view];
-	    engine->startVoice(reinterpret_cast<intptr_t>(touch), engine->nextSound(), mapAmp(pt.x));
+	    engine->startVoice(reinterpret_cast<intptr_t>(touch), engine->nextSound(), pt.x);
     }
 }
 
@@ -68,7 +63,7 @@ static float mapAmp(float amp)
 {
     for (UITouch* touch in touches) {
 	    const CGPoint pt = [self relativeLocation:touch inView:self.view];
-        engine->updateVoice(reinterpret_cast<intptr_t>(touch), mapAmp(pt.x));
+        engine->updateVoice(reinterpret_cast<intptr_t>(touch), pt.x);
     }
 }
 

@@ -119,7 +119,32 @@ size_t Engine::nextSound()
 
 static Methcla_Time kLatency = 0.1;
 
-void Engine::startVoice(VoiceId voice, size_t soundIndex, float amp)
+template <typename T> T linmap(T outMin, T outMax, T inMin, T inMax, T x)
+{
+    return (x - inMin) / (inMax - inMin) * (outMax - outMin) + outMin;
+}
+
+template <typename T> T expmap(T outMin, T outMax, T inMin, T inMax, T x)
+{
+    return outMin * std::pow(outMax / outMin, (x - inMin) / (inMax - inMin));
+}
+
+template <typename T> T dbamp(T db)
+{
+    return std::pow(T(10), db/T(20));
+}
+
+static float mapRate(float value)
+{
+#if 1
+    const float numOctaves = 4.f;
+    return expmap(1.f/numOctaves, numOctaves, 0.f, 1.f, value);
+#else
+    return 1.f;
+#endif
+}
+
+void Engine::startVoice(VoiceId voice, size_t soundIndex, float param)
 {
     if (m_voices.find(voice) != m_voices.end()) {
         stopVoice(voice);
@@ -134,7 +159,7 @@ void Engine::startVoice(VoiceId voice, size_t soundIndex, float amp)
                 // ... and uncomment this one for memory-based playback.
                 // METHCLA_PLUGINS_SAMPLER_URI,
                 m_voiceGroup,
-                { amp },
+                { dbamp(-3.f), mapRate(param) },
                 { Methcla::Value(sound.path())
                 , Methcla::Value(true) }
             );
@@ -150,19 +175,22 @@ void Engine::startVoice(VoiceId voice, size_t soundIndex, float amp)
         std::cout << "Synth " << synth.id()
                   << sound.path()
                   << " duration=" << sound.duration()
-                  << " amp=" << amp
+                  << " param=" << param
+                  << " rate=" << mapRate(param)
                   << std::endl;
     }
 }
 
-void Engine::updateVoice(VoiceId voice, float amp)
+void Engine::updateVoice(VoiceId voice, float param)
 {
     auto it = m_voices.find(voice);
     assert( it != m_voices.end() );
-    m_engine->set(it->second, 0, amp);
-//    std::cout << "Synth " << it->second.id()
-//              << " amp=" << amp
-//              << std::endl;
+    const float rate = mapRate(param);
+    m_engine->set(it->second, 1, rate);
+    std::cout << "Synth " << it->second.id()
+              << " param=" << param
+              << " rate=" << rate
+              << std::endl;
 }
 
 void Engine::stopVoice(VoiceId voice)
