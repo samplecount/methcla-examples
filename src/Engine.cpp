@@ -68,14 +68,15 @@ Engine::Engine(const std::string& soundDir)
     : m_engine(nullptr)
     , m_nextSound(0)
 {
+    Methcla::EngineOptions options;
+    options.audioDriver.bufferSize = 256;
+    options << methcla_soundfile_api_extaudiofile
+            << methcla_plugins_sampler
+            << methcla_plugins_disksampler
+            << methcla_plugins_patch_cable;
+
     // Create the engine with a set of plugins.
-    m_engine = new Methcla::Engine({
-        Methcla::Option::driverBufferSize(256),
-        Methcla::Option::pluginLibrary(methcla_soundfile_api_extaudiofile),
-        Methcla::Option::pluginLibrary(methcla_plugins_sampler),
-        Methcla::Option::pluginLibrary(methcla_plugins_disksampler),
-        Methcla::Option::pluginLibrary(methcla_plugins_patch_cable)
-    });
+    m_engine = new Methcla::Engine(options);
 
     m_sounds = loadSounds(*m_engine, soundDir);
 
