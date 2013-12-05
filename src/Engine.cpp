@@ -18,6 +18,7 @@
 #include <methcla/plugins/pro/soundfile_api_extaudiofile.h>
 #include <methcla/plugins/pro/disksampler.h>
 #include <methcla/plugins/sampler.h>
+#include <methcla/plugins/node-control.h>
 #include <methcla/plugins/patch-cable.h>
 
 #include <iostream>
@@ -73,6 +74,7 @@ Engine::Engine(const std::string& soundDir)
     options << methcla_soundfile_api_extaudiofile
             << methcla_plugins_sampler
             << methcla_plugins_disksampler
+            << methcla_plugins_node_control
             << methcla_plugins_patch_cable;
 
     // Create the engine with a set of plugins.
@@ -85,18 +87,18 @@ Engine::Engine(const std::string& soundDir)
 
     m_voiceGroup = engine().group(engine().root());
 
-    for (auto bus : { 0, 1 })
-    {
-        Methcla::Request request(engine());
-        request.openBundle(Methcla::immediately);
-        auto synth = request.synth(METHCLA_PLUGINS_PATCH_CABLE_URI, engine().root(), {});
-        request.activate(synth);
-        request.mapInput(synth, 0, Methcla::AudioBusId(bus));
-        request.mapOutput(synth, 0, Methcla::AudioBusId(bus), Methcla::kBusMappingExternal);
-        request.closeBundle();
-        request.send();
-        m_patchCables.push_back(synth);
-    }
+//    for (auto bus : { 0, 1 })
+//    {
+//        Methcla::Request request(engine());
+//        request.openBundle(Methcla::immediately);
+//        auto synth = request.synth(METHCLA_PLUGINS_PATCH_CABLE_URI, engine().root(), {});
+//        request.activate(synth);
+//        request.mapInput(synth, 0, Methcla::AudioBusId(bus));
+//        request.mapOutput(synth, 0, Methcla::AudioBusId(bus), Methcla::kBusMappingExternal);
+//        request.closeBundle();
+//        request.send();
+//        m_patchCables.push_back(synth);
+//    }
 }
 
 Engine::~Engine()
@@ -154,25 +156,63 @@ void Engine::startVoice(VoiceId voice, size_t soundIndex, float param)
         const Sound& sound = m_sounds[soundIndex];
         Methcla::Request request(engine());
         request.openBundle(Methcla::immediately);
+            // Allocate two buses
+            Methcla::AudioBusId bus1 = m_engine->audioBusId().alloc();
+            Methcla::AudioBusId bus2 = m_engine->audioBusId().alloc();
+
+            // Create synth and map outputs to buses
             const Methcla::SynthId synth = request.synth(
                 // Comment this line ...
                 METHCLA_PLUGINS_DISKSAMPLER_URI,
                 // ... and uncomment this one for memory-based playback.
                 // METHCLA_PLUGINS_SAMPLER_URI,
                 m_voiceGroup,
-                { dbamp(-3.f), mapRate(param) },
+                { dbamp(-12.f), mapRate(param) },
                 { Methcla::Value(sound.path())
                 , Methcla::Value(true) }
             );
-            // Map to an internal bus for the fun of it
-            request.mapOutput(synth, 0, Methcla::AudioBusId(0));
-            request.mapOutput(synth, 1, Methcla::AudioBusId(1));
+            request.mapOutput(synth, 0, bus1);
+            request.mapOutput(synth, 1, bus2);
+
+            // Envelope options
+            const std::list<Methcla::Value> envOptions =
+                { Methcla::Value(0.05f)
+                , Methcla::Value(1.f)
+                , Methcla::Value(1.f)
+                , Methcla::Value(1.5f)
+                };
+
+            auto envelope1 = request.synth(METHCLA_PLUGINS_ASR_ENVELOPE_URI, m_voiceGroup, {}, envOptions);
+            request.mapInput(envelope1, 0, bus1);
+            request.mapOutput(envelope1, 0, Methcla::AudioBusId(0), Methcla::kBusMappingExternal);
+            request.whenDone(envelope1, Methcla::kNodeDoneFreeSelf|Methcla::kNodeDoneFreePreceeding);
+            request.activate(envelope1);
+
+            auto envelope2 = request.synth(METHCLA_PLUGINS_ASR_ENVELOPE_URI, m_voiceGroup, {}, envOptions);
+            request.mapInput(envelope2, 0, bus2);
+            request.mapOutput(envelope2, 0, Methcla::AudioBusId(1), Methcla::kBusMappingExternal);
+            request.whenDone(envelope2, Methcla::kNodeDoneFreeSelf);
+            request.activate(envelope2);
+
             request.openBundle(engine().currentTime() + kLatency);
                 request.activate(synth);
             request.closeBundle();
         request.closeBundle();
+
+        m_engine->addNotificationHandler(m_engine->freeNodeIdHandler(synth, [](Methcla::NodeId nodeId){
+            std::cout << "Freed " << nodeId.id() << std::endl;
+        }));
+        m_engine->addNotificationHandler(m_engine->freeNodeIdHandler(envelope1, [](Methcla::NodeId nodeId){
+            std::cout << "Freed " << nodeId.id() << std::endl;
+        }));
+        m_engine->addNotificationHandler(m_engine->freeNodeIdHandler(envelope2, [this,bus1,bus2](Methcla::NodeId nodeId){
+            std::cout << "Freed " << nodeId.id() << std::endl;
+            m_engine->audioBusId().free(bus1);
+            m_engine->audioBusId().free(bus2);
+        }));
+
         request.send();
-        m_voices[voice] = synth;
+//        m_voices[voice] = synth;
         std::cout << "Synth " << synth.id()
                   << sound.path()
                   << " duration=" << sound.duration()
@@ -184,25 +224,25 @@ void Engine::startVoice(VoiceId voice, size_t soundIndex, float param)
 
 void Engine::updateVoice(VoiceId voice, float param)
 {
-    auto it = m_voices.find(voice);
-    assert( it != m_voices.end() );
-    const float rate = mapRate(param);
-    m_engine->set(it->second, 1, rate);
-    std::cout << "Synth " << it->second.id()
-              << " param=" << param
-              << " rate=" << rate
-              << std::endl;
+//    auto it = m_voices.find(voice);
+//    assert( it != m_voices.end() );
+//    const float rate = mapRate(param);
+//    m_engine->set(it->second, 1, rate);
+//    std::cout << "Synth " << it->second.id()
+//              << " param=" << param
+//              << " rate=" << rate
+//              << std::endl;
 }
 
 void Engine::stopVoice(VoiceId voice)
 {
-    auto it = m_voices.find(voice);
-    if (it != m_voices.end()) {
-        Methcla::Request request(engine());
-        request.openBundle(engine().currentTime() + kLatency);
-        request.free(it->second);
-        request.closeBundle();
-        request.send();
-        m_voices.erase(it);
-    }
+//    auto it = m_voices.find(voice);
+//    if (it != m_voices.end()) {
+//        Methcla::Request request(engine());
+//        request.openBundle(engine().currentTime() + kLatency);
+//        request.free(it->second);
+//        request.closeBundle();
+////        request.send();
+//        m_voices.erase(it);
+//    }
 }
